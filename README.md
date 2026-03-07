@@ -1,2 +1,12 @@
-# GRUPO_14-_PROJETO_INTEGRADOR_-SANGUEFACIL-
-ENTREGA DO PROJETO INTEGRADOR ETAPA II
+
+SangueFácil V4
+
+Rodar backend:
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+
+Rodar frontend:
+cd frontend
+npm install
+npm start
