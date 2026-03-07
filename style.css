@@ -1,0 +1,694 @@
+/* =================================
+   RESET
+================================= */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+/* =================================
+   VARIABLES (DESIGN SYSTEM)
+================================= */
+
+:root{
+
+--primary:#E53935;
+--primary-dark:#B71C1C;
+--primary-light:#FF6B6B;
+
+--background:#F8FAFC;
+--card:#FFFFFF;
+
+--text:#1F2937;
+--text-light:#6B7280;
+
+--border:#E5E7EB;
+
+}
+
+/* =================================
+   BASE
+================================= */
+
+body{
+
+font-family:"Inter",sans-serif;
+
+background:
+
+radial-gradient(
+circle at 10% 20%,
+rgba(229,57,53,0.08),
+transparent 40%
+),
+
+radial-gradient(
+circle at 90% 80%,
+rgba(229,57,53,0.08),
+transparent 40%
+),
+
+linear-gradient(
+180deg,
+#F8FAFC,
+#EEF2F7
+);
+
+color:var(--text);
+
+min-height:100vh;
+
+}
+
+/* =================================
+   CONTAINER
+================================= */
+
+.container{
+max-width:1200px;
+margin:auto;
+padding:40px 20px;
+}
+
+/* =================================
+   NAVBAR
+================================= */
+
+.navbar{
+
+position:sticky;
+top:0;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:18px 40px;
+
+background:linear-gradient(
+135deg,
+#E53935,
+#C62828
+);
+
+color:white;
+
+box-shadow:0 10px 30px rgba(0,0,0,0.15);
+
+z-index:1000;
+
+}
+
+.nav-links{
+display:flex;
+gap:25px;
+}
+
+.nav-links a{
+
+color:white;
+text-decoration:none;
+font-weight:500;
+
+position:relative;
+
+transition:0.2s;
+
+}
+
+.nav-links a:hover{
+color:#FFDADA;
+transform:translateY(-2px);
+}
+
+.nav-links a::after{
+
+content:"";
+position:absolute;
+
+left:0;
+bottom:-4px;
+
+width:0%;
+height:2px;
+
+background:white;
+
+transition:0.3s;
+
+}
+
+.nav-links a:hover::after{
+width:100%;
+}
+
+/* =================================
+   CARDS
+================================= */
+
+.card{
+
+background:var(--card);
+
+padding:35px;
+
+border-radius:16px;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,0.08),
+0 2px 6px rgba(0,0,0,0.05);
+
+transition:0.25s;
+
+}
+
+.card:hover{
+
+transform:translateY(-3px);
+
+box-shadow:
+0 20px 40px rgba(0,0,0,0.12);
+
+}
+
+/* =================================
+   FORM ELEMENTS
+================================= */
+
+input,
+select{
+
+width:100%;
+
+padding:14px;
+
+border-radius:10px;
+
+border:1px solid var(--border);
+
+margin-bottom:12px;
+
+font-size:15px;
+
+background:white;
+
+transition:0.2s;
+
+}
+
+input:focus,
+select:focus{
+
+border:1px solid var(--primary);
+
+box-shadow:0 0 0 3px rgba(229,57,53,0.15);
+
+outline:none;
+
+}
+
+/* INPUT GROUP */
+
+.input-group{
+
+display:flex;
+align-items:center;
+gap:10px;
+
+border:1px solid var(--border);
+
+border-radius:10px;
+
+padding:12px;
+
+margin-bottom:15px;
+
+background:white;
+
+}
+
+.input-group svg{
+color:var(--primary);
+}
+
+.eye{
+cursor:pointer;
+color:#888;
+}
+
+/* =================================
+   BUTTONS
+================================= */
+
+button{
+
+background:linear-gradient(
+135deg,
+#E53935,
+#C62828
+);
+
+color:white;
+
+border:none;
+
+padding:14px;
+
+border-radius:10px;
+
+cursor:pointer;
+
+font-weight:600;
+
+transition:0.2s;
+
+box-shadow:0 8px 20px rgba(229,57,53,0.3);
+
+}
+
+button:hover{
+
+transform:translateY(-2px);
+
+box-shadow:0 12px 30px rgba(229,57,53,0.4);
+
+}
+
+/* =================================
+   LINKS
+================================= */
+
+.register-link,
+.login-link{
+
+margin-top:18px;
+text-align:center;
+font-size:14px;
+
+}
+
+.register-link a,
+.login-link a{
+
+color:var(--primary);
+font-weight:600;
+text-decoration:none;
+
+}
+
+.register-link a:hover,
+.login-link a:hover{
+text-decoration:underline;
+}
+
+/* =================================
+   DASHBOARD
+================================= */
+
+.hero-dashboard{
+text-align:center;
+margin-bottom:40px;
+}
+
+.hero-dashboard h1{
+font-size:36px;
+margin-bottom:10px;
+}
+
+.hero-dashboard p{
+font-size:18px;
+max-width:700px;
+margin:auto;
+line-height:1.6;
+color:var(--text-light);
+}
+
+/* STATS */
+
+.dashboard-stats{
+
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+
+gap:20px;
+
+margin:40px 0;
+
+}
+
+.stat-card{
+
+background:white;
+
+padding:25px;
+
+border-radius:12px;
+
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+
+text-align:center;
+
+}
+
+.stat-card h3{
+
+font-size:32px;
+color:var(--primary);
+
+}
+
+/* =================================
+   MAP
+================================= */
+
+.leaflet-container{
+
+margin-top:20px;
+
+border-radius:16px;
+
+box-shadow:0 10px 30px rgba(0,0,0,0.12);
+
+overflow:hidden;
+
+}
+
+.map-search{
+
+width:100%;
+
+padding:12px;
+
+margin-bottom:15px;
+
+border-radius:8px;
+
+border:1px solid var(--border);
+
+}
+
+/* =================================
+   HEMOCENTROS
+================================= */
+
+.hemocentro-hero{
+text-align:center;
+margin-bottom:30px;
+}
+
+.hemocentro-layout{
+
+display:grid;
+grid-template-columns:2fr 1fr;
+
+gap:25px;
+
+}
+
+.mapa{
+height:500px;
+border-radius:12px;
+}
+
+.lista-area{
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.hemocentro-card{
+
+background:white;
+
+padding:18px;
+
+border-radius:10px;
+
+box-shadow:0 8px 18px rgba(0,0,0,0.08);
+
+transition:0.2s;
+
+}
+
+.hemocentro-card:hover{
+transform:translateY(-3px);
+}
+
+.rota-btn{
+
+margin-top:8px;
+
+width:100%;
+
+background:var(--primary);
+
+}
+
+/* ESTOQUE */
+
+.estoque-baixo{
+color:red;
+font-weight:bold;
+}
+
+.estoque-medio{
+color:orange;
+font-weight:bold;
+}
+
+.estoque-normal{
+color:green;
+font-weight:bold;
+}
+
+/* =================================
+   LOGIN
+================================= */
+
+.login-page{
+
+display:grid;
+grid-template-columns:1fr 1fr;
+
+min-height:90vh;
+
+}
+
+.login-hero{
+
+background:linear-gradient(
+135deg,
+#E53935 0%,
+#FF6B6B 50%,
+#C62828 100%
+);
+
+color:white;
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+
+padding:100px;
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+.login-hero::before{
+
+content:"";
+
+position:absolute;
+
+width:400px;
+height:400px;
+
+background:radial-gradient(
+circle,
+rgba(255,255,255,0.25),
+transparent
+);
+
+top:-120px;
+left:-120px;
+
+}
+
+.login-hero h1{
+font-size:48px;
+margin-bottom:20px;
+}
+
+.login-hero p{
+font-size:18px;
+max-width:400px;
+}
+
+.login-box{
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+
+padding:60px;
+
+background:rgba(255,255,255,0.8);
+
+backdrop-filter:blur(14px);
+
+border-radius:20px;
+
+box-shadow:0 20px 40px rgba(0,0,0,0.12);
+
+}
+
+/* =================================
+   ANIMATIONS
+================================= */
+
+.fade-in{
+animation:fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn{
+
+from{
+opacity:0;
+transform:translateY(20px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}   
+/* =========================
+   BACK BUTTON
+========================= */
+
+.back-button{
+
+display:flex;
+align-items:center;
+gap:8px;
+
+background:white;
+
+border:1px solid #E5E7EB;
+
+padding:10px 16px;
+
+border-radius:10px;
+
+font-size:14px;
+
+font-weight:500;
+
+cursor:pointer;
+
+transition:0.2s;
+
+box-shadow:0 4px 10px rgba(0,0,0,0.05);
+
+margin-bottom:20px;
+
+}
+
+.back-icon{
+color:#E53935;
+}
+
+.back-button:hover{
+
+background:#F8FAFC;
+
+transform:translateY(-1px);
+
+box-shadow:0 8px 18px rgba(0,0,0,0.1);
+
+}
+
+/* SOBRE NOS */
+
+.sobre-header{
+
+max-width:800px;
+margin:auto;
+text-align:center;
+margin-bottom:40px;
+
+}
+
+.sobre-header p{
+
+color:#6B7280;
+line-height:1.6;
+
+}
+
+/* MEDIA */
+
+.avaliacao-media{
+
+text-align:center;
+margin-bottom:40px;
+
+}
+
+.avaliacao-media h2{
+
+font-size:40px;
+color:#E53935;
+
+}
+
+/* FORM */
+
+.avaliacao-form{
+
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+margin-bottom:40px;
+
+}
+
+/* LISTA */
+
+.avaliacoes-lista{
+
+display:grid;
+gap:20px;
+
+}
+
+.avaliacao-card{
+
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+
+}
+
+/* =========================
+   MAIN LAYOUT FIX
+========================= */
+
+.main-container{
+
+max-width:1200px;
+margin:auto;
+
+padding:80px 20px;
+
+min-height:calc(100vh - 80px);
+
+}
