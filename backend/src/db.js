@@ -20,6 +20,7 @@ export async function createDb(dbPath = DEFAULT_DB_PATH) {
       nome TEXT NOT NULL,
       idade INTEGER NOT NULL,
       email TEXT NOT NULL UNIQUE,
+      senha_hash TEXT,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -35,12 +36,18 @@ export async function createDb(dbPath = DEFAULT_DB_PATH) {
   await db.exec(`
     CREATE TABLE IF NOT EXISTS agendamentos (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      doador_id INTEGER,
       hemocentro TEXT NOT NULL,
       data TEXT NOT NULL,
       horario TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (doador_id) REFERENCES doadores(id)
     )
   `);
+
+  // Backward-compatible migrations for already existing databases.
+  await db.exec("ALTER TABLE doadores ADD COLUMN senha_hash TEXT").catch(() => {});
+  await db.exec("ALTER TABLE agendamentos ADD COLUMN doador_id INTEGER").catch(() => {});
 
   await db.exec(`
     CREATE TABLE IF NOT EXISTS gestores (

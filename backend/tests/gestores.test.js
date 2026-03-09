@@ -24,6 +24,7 @@ async function setupServer() {
     await new Promise((resolve, reject) => {
       server.close((err) => (err ? reject(err) : resolve()));
     });
+    await db.close();
     await rm(tempDir, { recursive: true, force: true });
   }
 

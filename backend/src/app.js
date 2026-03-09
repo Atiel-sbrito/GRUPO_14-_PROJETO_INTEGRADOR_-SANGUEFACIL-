@@ -1,9 +1,72 @@
 import express from "express";
+import crypto from "node:crypto";
+
+const TOKEN_SECRET = process.env.TOKEN_SECRET || "sanguefacil-dev-secret";
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const derived = crypto.scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${derived}`;
+}
+
+function verifyPassword(password, storedHash) {
+  const [salt, hash] = String(storedHash || "").split(":");
+  if (!salt || !hash) return false;
+
+  const attempt = crypto.scryptSync(password, salt, 64).toString("hex");
+  try {
+    return crypto.timingSafeEqual(Buffer.from(hash, "hex"), Buffer.from(attempt, "hex"));
+  } catch {
+    return false;
+  }
+}
+
+function signDoadorToken(doadorId) {
+  const payload = `${doadorId}:${Date.now()}`;
+  const signature = crypto
+    .createHmac("sha256", TOKEN_SECRET)
+    .update(payload)
+    .digest("hex");
+  return Buffer.from(`${payload}:${signature}`).toString("base64");
+}
+
+function verifyDoadorToken(token) {
+  try {
+    const raw = Buffer.from(String(token || ""), "base64").toString("utf8");
+    const [idStr, ts, signature] = raw.split(":");
+    if (!idStr || !ts || !signature) return null;
+
+    const payload = `${idStr}:${ts}`;
+    const expected = crypto
+      .createHmac("sha256", TOKEN_SECRET)
+      .update(payload)
+      .digest("hex");
+
+    const isValid = crypto.timingSafeEqual(
+      Buffer.from(signature, "hex"),
+      Buffer.from(expected, "hex"),
+    );
+    if (!isValid) return null;
+
+    const doadorId = Number(idStr);
+    if (!Number.isInteger(doadorId) || doadorId <= 0) return null;
+    return { doadorId };
+  } catch {
+    return null;
+  }
+}
+
+function parseBearerToken(authHeader) {
+  const value = String(authHeader || "");
+  if (!value.startsWith("Bearer ")) return "";
+  return value.slice(7).trim();
+}
 
 function validateDoadorPayload(payload) {
   const nome = typeof payload?.nome === "string" ? payload.nome.trim() : "";
   const email = typeof payload?.email === "string" ? payload.email.trim().toLowerCase() : "";
   const idade = Number(payload?.idade);
+  const senha = typeof payload?.senha === "string" ? payload.senha : "";
 
   if (!nome) {
     return { ok: false, status: 400, error: "Nome e obrigatorio." };
@@ -17,7 +80,11 @@ function validateDoadorPayload(payload) {
     return { ok: false, status: 400, error: "Idade minima para doacao: 16 anos." };
   }
 
-  return { ok: true, value: { nome, email, idade } };
+  if (senha.length < 6) {
+    return { ok: false, status: 400, error: "Senha deve ter no minimo 6 caracteres." };
+  }
+
+  return { ok: true, value: { nome, email, idade, senha } };
 }
 
 function validateAgendamentoPayload(payload) {
@@ -91,14 +158,16 @@ export function createApp({ db }) {
       return res.status(validation.status).json({ error: validation.error });
     }
 
-    const { nome, email, idade } = validation.value;
+    const { nome, email, idade, senha } = validation.value;
+    const senhaHash = hashPassword(senha);
 
     try {
       const result = await db.run(
-        "INSERT INTO doadores (nome, idade, email) VALUES (?, ?, ?)",
+        "INSERT INTO doadores (nome, idade, email, senha_hash) VALUES (?, ?, ?, ?)",
         nome,
         idade,
         email,
+        senhaHash,
       );
 
       const doador = await db.get(
@@ -116,7 +185,44 @@ export function createApp({ db }) {
     }
   });
 
+  app.post("/api/doadores/login", async (req, res) => {
+    const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    const senha = typeof req.body?.senha === "string" ? req.body.senha : "";
+
+    if (!email) return res.status(400).json({ error: "email e obrigatorio." });
+    if (!senha) return res.status(400).json({ error: "senha e obrigatoria." });
+
+    try {
+      const doador = await db.get(
+        "SELECT id, nome, email, idade, senha_hash FROM doadores WHERE email = ?",
+        email,
+      );
+
+      if (!doador || !verifyPassword(senha, doador.senha_hash)) {
+        return res.status(401).json({ error: "Credenciais invalidas" });
+      }
+
+      return res.status(200).json({
+        token: signDoadorToken(doador.id),
+        doador: {
+          id: doador.id,
+          nome: doador.nome,
+          email: doador.email,
+          idade: doador.idade,
+        },
+      });
+    } catch (_error) {
+      return res.status(500).json({ error: "Erro interno ao autenticar doador." });
+    }
+  });
+
   app.post("/api/agendamentos", async (req, res) => {
+    const token = parseBearerToken(req.headers.authorization);
+    const auth = verifyDoadorToken(token);
+    if (!auth) {
+      return res.status(401).json({ error: "Autenticacao obrigatoria para agendamento." });
+    }
+
     const validation = validateAgendamentoPayload(req.body);
     if (!validation.ok) {
       return res.status(validation.status).json({ error: validation.error });
@@ -126,7 +232,8 @@ export function createApp({ db }) {
 
     try {
       const result = await db.run(
-        "INSERT INTO agendamentos (hemocentro, data, horario) VALUES (?, ?, ?)",
+        "INSERT INTO agendamentos (doador_id, hemocentro, data, horario) VALUES (?, ?, ?, ?)",
+        auth.doadorId,
         hemocentro,
         data,
         horario,
@@ -151,6 +258,24 @@ export function createApp({ db }) {
       return res.status(200).json(agendamentos);
     } catch (_error) {
       return res.status(500).json({ error: "Erro ao buscar agendamentos." });
+    }
+  });
+
+  app.get("/api/doadores/me/agendamentos", async (req, res) => {
+    const token = parseBearerToken(req.headers.authorization);
+    const auth = verifyDoadorToken(token);
+    if (!auth) {
+      return res.status(401).json({ error: "Autenticacao obrigatoria." });
+    }
+
+    try {
+      const agendamentos = await db.all(
+        "SELECT id, hemocentro, data, horario, created_at FROM agendamentos WHERE doador_id = ? ORDER BY created_at DESC",
+        auth.doadorId,
+      );
+      return res.status(200).json(agendamentos);
+    } catch (_error) {
+      return res.status(500).json({ error: "Erro ao buscar agendamentos do doador." });
     }
   });
 

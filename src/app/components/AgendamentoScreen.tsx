@@ -4,12 +4,13 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
 interface AgendamentoScreenProps {
+  doadorToken?: string;
   hemocentro?: string;
   onVoltar?: () => void;
   onConfirmar?: () => void;
 }
 
-export default function AgendamentoScreen({ hemocentro, onVoltar, onConfirmar }: AgendamentoScreenProps) {
+export default function AgendamentoScreen({ doadorToken, hemocentro, onVoltar, onConfirmar }: AgendamentoScreenProps) {
   const [hemocentroValue, setHemocentroValue] = useState(hemocentro || "");
   const [dataValue, setDataValue] = useState("");
   const [horarioValue, setHorarioValue] = useState("");
@@ -24,7 +25,10 @@ export default function AgendamentoScreen({ hemocentro, onVoltar, onConfirmar }:
     try {
       const response = await fetch("http://localhost:3001/api/agendamentos", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${doadorToken || ""}`,
+        },
         body: JSON.stringify({
           hemocentro: hemocentroValue,
           data: dataValue,
@@ -34,6 +38,10 @@ export default function AgendamentoScreen({ hemocentro, onVoltar, onConfirmar }:
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({ error: "Falha ao agendar." }));
+        if (response.status === 401) {
+          setErrorMessage("Faça login como doador para realizar agendamentos.");
+          return;
+        }
         setErrorMessage(body.error || "Falha ao agendar.");
         return;
       }

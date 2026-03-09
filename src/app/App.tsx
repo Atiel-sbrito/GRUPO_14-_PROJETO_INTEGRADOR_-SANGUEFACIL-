@@ -4,6 +4,7 @@ import CadastroScreen from "./components/CadastroScreen";
 import HemocentrosScreen from "./components/HemocentrosScreen";
 import AgendamentoScreen from "./components/AgendamentoScreen";
 import FeedbackScreen from "./components/FeedbackScreen";
+import LoginDoadorScreen from "./components/LoginDoadorScreen";
 import LoginGestorScreen from "./components/LoginGestorScreen";
 import DashboardScreen from "./components/DashboardScreen";
 import CriarCampanhaScreen from "./components/CriarCampanhaScreen";
@@ -12,6 +13,7 @@ import Footer from "./components/Footer";
 
 type Screen = 
   | 'home' 
+  | 'login-doador'
   | 'cadastro' 
   | 'hemocentros' 
   | 'agendamento' 
@@ -24,6 +26,27 @@ type Screen =
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedHemocentro, setSelectedHemocentro] = useState<string>("");
+  const [doadorToken, setDoadorToken] = useState<string>(() => localStorage.getItem("doador_token") || "");
+
+  function handleLogoutDoador() {
+    localStorage.removeItem("doador_token");
+    localStorage.removeItem("doador_data");
+    setDoadorToken("");
+    setCurrentScreen("home");
+  }
+
+  if (currentScreen === 'login-doador') {
+    return (
+      <LoginDoadorScreen
+        onVoltar={() => setCurrentScreen('home')}
+        onIrParaCadastro={() => setCurrentScreen('cadastro')}
+        onEntrar={(auth) => {
+          setDoadorToken(auth.token);
+          setCurrentScreen('hemocentros');
+        }}
+      />
+    );
+  }
 
   // Fluxo do Doador
   if (currentScreen === 'cadastro') {
@@ -31,9 +54,23 @@ export default function App() {
   }
 
   if (currentScreen === 'hemocentros') {
+    if (!doadorToken) {
+      return (
+        <LoginDoadorScreen
+          onVoltar={() => setCurrentScreen('home')}
+          onIrParaCadastro={() => setCurrentScreen('cadastro')}
+          onEntrar={(auth) => {
+            setDoadorToken(auth.token);
+            setCurrentScreen('hemocentros');
+          }}
+        />
+      );
+    }
+
     return (
       <HemocentrosScreen 
-        onVoltar={() => setCurrentScreen('home')} 
+        doadorToken={doadorToken}
+        onVoltar={handleLogoutDoador}
         onAgendar={(hemocentro) => {
           setSelectedHemocentro(hemocentro);
           setCurrentScreen('agendamento');
@@ -45,6 +82,7 @@ export default function App() {
   if (currentScreen === 'agendamento') {
     return (
       <AgendamentoScreen 
+        doadorToken={doadorToken}
         hemocentro={selectedHemocentro}
         onVoltar={() => setCurrentScreen('hemocentros')} 
         onConfirmar={() => setCurrentScreen('feedback')}
@@ -175,7 +213,7 @@ export default function App() {
           {/* Botões com espaçamento de 20px */}
           <div className="flex gap-4 mt-5 flex-wrap justify-center">
             <Button 
-              onClick={() => setCurrentScreen('hemocentros')}
+              onClick={() => setCurrentScreen('login-doador')}
               className="bg-[#FBC02D] hover:bg-[#F9A825] text-white px-8 py-6 text-lg"
               style={{ fontWeight: 500 }}
             >

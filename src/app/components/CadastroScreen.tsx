@@ -30,6 +30,7 @@ export default function CadastroScreen({ onVoltar }: CadastroScreenProps) {
           nome,
           idade: Number(idade),
           email,
+          senha,
         }),
       });
 
@@ -153,6 +154,8 @@ export default function CadastroScreen({ onVoltar }: CadastroScreenProps) {
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 placeholder="Digite uma senha segura"
+                minLength={6}
+                required
                 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400 }}
               />
             </div>

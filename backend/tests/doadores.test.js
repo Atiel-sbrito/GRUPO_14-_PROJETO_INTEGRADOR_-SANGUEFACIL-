@@ -42,6 +42,7 @@ test("POST /api/doadores cria doador com sucesso", async () => {
         nome: "Joao Silva",
         idade: 28,
         email: "joao@email.com",
+        senha: "123456",
       }),
     });
 
@@ -68,6 +69,7 @@ test("POST /api/doadores retorna 400 para idade invalida", async () => {
         nome: "Maria",
         idade: 15,
         email: "maria@email.com",
+        senha: "123456",
       }),
     });
 
@@ -87,6 +89,7 @@ test("POST /api/doadores retorna 409 para email duplicado", async () => {
       nome: "Carlos",
       idade: 35,
       email: "carlos@email.com",
+      senha: "123456",
     };
 
     const firstResponse = await fetch(`${baseUrl}/api/doadores`, {
@@ -105,6 +108,69 @@ test("POST /api/doadores retorna 409 para email duplicado", async () => {
     assert.equal(secondResponse.status, 409);
     const body = await secondResponse.json();
     assert.equal(body.error, "Email ja cadastrado.");
+  } finally {
+    await cleanup();
+  }
+});
+
+test("POST /api/doadores/login autentica doador com sucesso", async () => {
+  const { baseUrl, cleanup } = await setupServer();
+
+  try {
+    await fetch(`${baseUrl}/api/doadores`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nome: "Doador Teste",
+        idade: 30,
+        email: "doador@login.com",
+        senha: "senhaSegura",
+      }),
+    });
+
+    const response = await fetch(`${baseUrl}/api/doadores/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: "doador@login.com",
+        senha: "senhaSegura",
+      }),
+    });
+
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.ok(body.token);
+    assert.equal(body.doador.email, "doador@login.com");
+  } finally {
+    await cleanup();
+  }
+});
+
+test("POST /api/doadores/login retorna 401 para credenciais invalidas", async () => {
+  const { baseUrl, cleanup } = await setupServer();
+
+  try {
+    await fetch(`${baseUrl}/api/doadores`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nome: "Doador Teste",
+        idade: 30,
+        email: "doador@login.com",
+        senha: "senhaSegura",
+      }),
+    });
+
+    const response = await fetch(`${baseUrl}/api/doadores/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: "doador@login.com",
+        senha: "senhaErrada",
+      }),
+    });
+
+    assert.equal(response.status, 401);
   } finally {
     await cleanup();
   }
