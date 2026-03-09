@@ -10,7 +10,7 @@ Sistema web para facilitar o agendamento de doações de sangue, com fluxos sepa
 - Kauê
 - Ronald
 - Mayne
-- Caio
+- Caio Limas
 - Raphaela
 
 ## 🚀 Tecnologias Utilizadas
@@ -80,7 +80,6 @@ GRUPO_14-_PROJETO_INTEGRADOR_-SANGUEFACIL-/
 ├── postcss.config.mjs             # Configuração do PostCSS
 ├── vite.config.ts                 # Configuração do Vite
 ├── README.md                      # Este arquivo
-├── ROTEIRO_TESTES.md              # Guia de testes manual
 ├── ATTRIBUTIONS.md                # Atribuições e créditos
 ```
 
@@ -436,19 +435,8 @@ Este projeto inclui documentação completa:
 | Arquivo | Descrição |
 |---------|-----------|
 | [README.md](README.md) | Este arquivo - Guia completo do projeto |
-| [ROTEIRO_TESTES.md](ROTEIRO_TESTES.md) | Guia passo-a-passo para testar todas as funcionalidades |
 | [ATTRIBUTIONS.md](ATTRIBUTIONS.md) | Atribuições e créditos de tecnologias/bibliotecas |
 | [.env.example](.env.example) | Exemplo de variáveis de ambiente |
-
----
-
-## �📝 Notas de Desenvolvimento
-
-Este projeto segue os princípios de:
-- **TDD** (Test-Driven Development) - 14 testes com 100% de aprovação
-- **Small Releases** (commits pequenos e atômicos)
-- **Refactoring Contínuo** - Código limpo e bem estruturado
-- **Integração Contínua** - Todos os commits passam nos testes
 
 ---
 
@@ -469,24 +457,12 @@ Para testar todas as funcionalidades no navegador:
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:3001
 
-3. **Siga o roteiro de testes:**
-   - Veja [ROTEIRO_TESTES.md](ROTEIRO_TESTES.md) para instruções detalhadas
-   - Inclui testes do fluxo de doador e gestor
-   - Testes de validações e casos extremos
 
-4. **Execute os testes automatizados:**
+3. **Execute os testes automatizados:**
    ```bash
    npm run backend:test
    ```
    Resultado esperado: **14/14 testes passando ✅**
-
----
-
-## 📹 Vídeo de Apresentação
-
-Um vídeo de demonstração (máximo 1 minuto) está disponível mostrando:
-- Fluxo completo do doador (cadastro → hemocentros → agendamento)
-- Fluxo completo do gestor (login → dashboard → criar campanha)
 
 ---
 
@@ -498,4 +474,3 @@ Este projeto foi desenvolvido como parte do **Projeto Integrador** do curso de D
 
 **Desenvolvido por:** Atiel S. Brito, Kauê, Francisco Wellington, Ronald, Mayne, Caio, Raphaela  
 **Data:** Março de 2026  
-**Status:** ✅ MVP Completo - Pronto para Produção
