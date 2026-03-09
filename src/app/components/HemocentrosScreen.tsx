@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 
@@ -6,16 +7,37 @@ interface HemocentrosScreenProps {
   onAgendar?: (hemocentro: string) => void;
 }
 
-const hemocentros = [
-  { id: 1, nome: "Hemocentro Central São Paulo", distancia: "1.2 km" },
-  { id: 2, nome: "Hemocentro Regional Paulista", distancia: "2.5 km" },
-  { id: 3, nome: "Hospital das Clínicas - Banco de Sangue", distancia: "3.0 km" },
-  { id: 4, nome: "Hemocentro Santa Casa", distancia: "4.1 km" },
-  { id: 5, nome: "Hemocentro Vila Mariana", distancia: "5.3 km" },
-  { id: 6, nome: "Centro de Hemoterapia Albert Einstein", distancia: "6.7 km" },
-];
+interface Hemocentro {
+  id: number;
+  nome: string;
+  distancia: string;
+}
 
 export default function HemocentrosScreen({ onVoltar, onAgendar }: HemocentrosScreenProps) {
+  const [hemocentros, setHemocentros] = useState<Hemocentro[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    async function fetchHemocentros() {
+      try {
+        const response = await fetch("http://localhost:3001/api/hemocentros");
+        if (!response.ok) {
+          setErrorMessage("Falha ao carregar hemocentros.");
+          return;
+        }
+        const data = await response.json();
+        setHemocentros(data);
+      } catch (_error) {
+        setErrorMessage("Nao foi possivel conectar ao backend.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchHemocentros();
+  }, []);
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: 'Roboto, sans-serif' }}>
       {/* Header com botão voltar */}
@@ -47,9 +69,28 @@ export default function HemocentrosScreen({ onVoltar, onAgendar }: HemocentrosSc
           Agende sua doação de forma rápida e segura.
         </p>
 
+        {/* Loading state */}
+        {isLoading ? (
+          <div className="mt-[30px] text-center">
+            <p className="text-gray-600" style={{ fontWeight: 400 }}>
+              Carregando hemocentros...
+            </p>
+          </div>
+        ) : null}
+
+        {/* Error state */}
+        {errorMessage ? (
+          <div className="mt-[30px]">
+            <p className="text-red-600" style={{ fontWeight: 400 }}>
+              {errorMessage}
+            </p>
+          </div>
+        ) : null}
+
         {/* Lista de Hemocentros - 30px de espaçamento do título */}
-        <div className="mt-[30px] space-y-5">
-          {hemocentros.map((hemocentro) => (
+        {!isLoading && !errorMessage ? (
+          <div className="mt-[30px] space-y-5">
+            {hemocentros.map((hemocentro) => (
             <Card key={hemocentro.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -79,6 +120,7 @@ export default function HemocentrosScreen({ onVoltar, onAgendar }: HemocentrosSc
             </Card>
           ))}
         </div>
+        ) : null}
       </main>
     </div>
   );

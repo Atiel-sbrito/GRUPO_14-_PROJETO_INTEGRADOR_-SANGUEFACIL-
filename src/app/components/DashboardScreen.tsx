@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
@@ -7,12 +8,13 @@ interface DashboardScreenProps {
   onVerRelatorio?: () => void;
 }
 
-const agendamentos = [
-  { id: 1, nome: "João Silva", data: "15/03/2026", horario: "09:00", hemocentro: "Hemocentro Central" },
-  { id: 2, nome: "Maria Santos", data: "15/03/2026", horario: "10:30", hemocentro: "Hemocentro Regional" },
-  { id: 3, nome: "Pedro Costa", data: "16/03/2026", horario: "14:00", hemocentro: "Hemocentro Central" },
-  { id: 4, nome: "Ana Oliveira", data: "16/03/2026", horario: "15:30", hemocentro: "Santa Casa" },
-];
+interface Agendamento {
+  id: number;
+  hemocentro: string;
+  data: string;
+  horario: string;
+  created_at: string;
+}
 
 const estoqueAtual = [
   { tipo: "A+", quantidade: 45, status: "normal" },
@@ -26,6 +28,32 @@ const estoqueAtual = [
 ];
 
 export default function DashboardScreen({ onVoltar, onCriarCampanha, onVerRelatorio }: DashboardScreenProps) {
+  const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    async function fetchAgendamentos() {
+      try {
+        const response = await fetch("http://localhost:3001/api/agendamentos");
+        
+        if (!response.ok) {
+          setErrorMessage("Falha ao carregar agendamentos.");
+          return;
+        }
+
+        const data = await response.json();
+        setAgendamentos(data);
+      } catch (_error) {
+        setErrorMessage("Nao foi possivel conectar ao backend.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchAgendamentos();
+  }, []);
+
   const getStatusColor = (status: string) => {
     if (status === "crítico") return "bg-red-100 text-red-700";
     if (status === "baixo") return "bg-yellow-100 text-yellow-700";
@@ -103,26 +131,38 @@ export default function DashboardScreen({ onVoltar, onCriarCampanha, onVerRelato
               <CardTitle style={{ fontWeight: 700 }}>Próximos Agendamentos</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {agendamentos.map((agendamento) => (
-                  <div key={agendamento.id} className="p-4 border rounded-lg hover:bg-gray-50">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="font-semibold text-gray-900" style={{ fontWeight: 500 }}>
-                        {agendamento.nome}
+              {errorMessage && (
+                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4">
+                  {errorMessage}
+                </div>
+              )}
+              
+              {isLoading ? (
+                <div className="text-center py-8 text-gray-500">Carregando...</div>
+              ) : agendamentos.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">Nenhum agendamento encontrado</div>
+              ) : (
+                <div className="space-y-3">
+                  {agendamentos.map((agendamento) => (
+                    <div key={agendamento.id} className="p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="font-semibold text-gray-900" style={{ fontWeight: 500 }}>
+                          Agendamento #{agendamento.id}
+                        </div>
+                        <div className="text-sm text-gray-500" style={{ fontWeight: 400 }}>
+                          {agendamento.horario}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-500" style={{ fontWeight: 400 }}>
-                        {agendamento.horario}
+                      <div className="text-sm text-gray-600" style={{ fontWeight: 400 }}>
+                        📅 {agendamento.data}
+                      </div>
+                      <div className="text-sm text-gray-600" style={{ fontWeight: 400 }}>
+                        📍 {agendamento.hemocentro}
                       </div>
                     </div>
-                    <div className="text-sm text-gray-600" style={{ fontWeight: 400 }}>
-                      📅 {agendamento.data}
-                    </div>
-                    <div className="text-sm text-gray-600" style={{ fontWeight: 400 }}>
-                      📍 {agendamento.hemocentro}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

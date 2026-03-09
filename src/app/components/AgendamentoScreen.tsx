@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -9,6 +10,42 @@ interface AgendamentoScreenProps {
 }
 
 export default function AgendamentoScreen({ hemocentro, onVoltar, onConfirmar }: AgendamentoScreenProps) {
+  const [hemocentroValue, setHemocentroValue] = useState(hemocentro || "");
+  const [dataValue, setDataValue] = useState("");
+  const [horarioValue, setHorarioValue] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setErrorMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("http://localhost:3001/api/agendamentos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          hemocentro: hemocentroValue,
+          data: dataValue,
+          horario: horarioValue,
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({ error: "Falha ao agendar." }));
+        setErrorMessage(body.error || "Falha ao agendar.");
+        return;
+      }
+
+      onConfirmar?.();
+    } catch (_error) {
+      setErrorMessage("Nao foi possivel conectar ao backend.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: 'Inter, sans-serif' }}>
       {/* Header com botão voltar */}
@@ -42,7 +79,7 @@ export default function AgendamentoScreen({ hemocentro, onVoltar, onConfirmar }:
           </p>
 
           {/* Formulário */}
-          <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); onConfirmar?.(); }}>
+          <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Campo Hemocentro - espaçamento de 20px */}
             <div className="space-y-2">
               <Label 
@@ -54,7 +91,8 @@ export default function AgendamentoScreen({ hemocentro, onVoltar, onConfirmar }:
               <Input
                 id="hemocentro"
                 type="text"
-                defaultValue={hemocentro || ""}
+                value={hemocentroValue}
+                onChange={(e) => setHemocentroValue(e.target.value)}
                 placeholder="Selecione o hemocentro"
                 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400 }}
               />
@@ -71,6 +109,8 @@ export default function AgendamentoScreen({ hemocentro, onVoltar, onConfirmar }:
               <Input
                 id="data"
                 type="date"
+                value={dataValue}
+                onChange={(e) => setDataValue(e.target.value)}
                 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400 }}
               />
             </div>
@@ -86,18 +126,27 @@ export default function AgendamentoScreen({ hemocentro, onVoltar, onConfirmar }:
               <Input
                 id="horario"
                 type="time"
+                value={horarioValue}
+                onChange={(e) => setHorarioValue(e.target.value)}
                 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400 }}
               />
             </div>
+
+            {errorMessage ? (
+              <p className="text-sm text-red-600" style={{ fontWeight: 400 }}>
+                {errorMessage}
+              </p>
+            ) : null}
 
             {/* Botão Confirmar - 30px abaixo */}
             <div className="pt-[30px]">
               <Button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full bg-[#E53935] hover:bg-[#D32F2F] text-white py-6"
                 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}
               >
-                Confirmar Agendamento
+                {isSubmitting ? "Confirmando..." : "Confirmar Agendamento"}
               </Button>
             </div>
           </form>
