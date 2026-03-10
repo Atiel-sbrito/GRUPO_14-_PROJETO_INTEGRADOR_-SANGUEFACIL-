@@ -257,7 +257,7 @@ curl -X POST http://localhost:3001/api/gestores/login \
 
 2. **CadastroScreen** 
    - Formulário de cadastro de doador
-   - Campos: Nome, Email, Idade, CPF, Telefone, Tipo Sanguíneo, Data de Nascimento
+   - Campos: Nome, Email, Idade
    - Integração com API POST `/api/doadores`
    - Validação: idade mínima 16 anos
    - Feedback: sucesso ou erro
