@@ -466,6 +466,17 @@ Para testar todas as funcionalidades no navegador:
 
 ---
 
+## 🎥 Vídeos de Apresentação
+
+- **Apresentação do Software:** https://youtu.be/pHkyO6gP_no
+- **Apresentação do Projeto:** https://www.youtube.com/shorts/o_yUKztoxDw?feature=share
+
+Os vídeos demonstram os fluxos principais solicitados na atividade:
+- Fluxo do doador (cadastro, login e agendamento)
+- Fluxo do gestor (login, dashboard, campanhas e relatório)
+
+---
+
 ## 📄 Licença
 
 Este projeto foi desenvolvido como parte do **Projeto Integrador** do curso de Desenvolvimento de Sistemas Orientado a Dispositivos Móveis e Baseado na Web do **SENAC EAD**.
